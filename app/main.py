@@ -3,9 +3,17 @@ from fastapi import Body, FastAPI
 from fastapi.responses import JSONResponse
 
 from .worker.celery_worker import create_task, celery_app
+from .app_config import get_app_config
 
 app = FastAPI()
 
+@app.get("/app_config")
+def app_config():
+    return get_app_config()
+
+@app.get("/root")
+def root():
+    return {"message": "Hello"}
 
 @app.post("/tasks", status_code=201)
 def run_task(payload = Body(...)):

@@ -37,6 +37,77 @@ services:
         aliases:
           - redis
 
+  fastapi:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile-local
+    container_name: fastapi
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      APP_ENV: local_docker
+      WATCHFILES_FORCE_POLLING: true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/code/app
+    networks:
+      net:
+        aliases:
+          - fastapi
+    depends_on:
+      - rabbitmq
+      - redis
+
+  celery:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile-local
+    container_name: celery
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    command: celery -A app.worker.celery_worker worker -Q task_queue,celery -l DEBUG
+    environment:
+      APP_ENV: local_docker
+    volumes:
+      - ./app:/code/app
+    networks:
+      net:
+        aliases:
+          - celery
+    depends_on:
+      - rabbitmq
+      - redis
+
+  flower:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile-local
+    container_name: flower
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    command: celery -A app.worker.celery_worker flower --broker_api="http://admin:d418ae373cad@rabbitmq:15672/api/" --logging="DEBUG"
+    environment:
+      APP_ENV: local_docker
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./app:/code/app
+    networks:
+      net:
+        aliases:
+          - flower
+    depends_on:
+      - rabbitmq
+      - redis
+
 volumes:
   rabbitmq_data:
     driver: local

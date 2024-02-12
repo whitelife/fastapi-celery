@@ -1,5 +1,6 @@
 from celery import Celery
-from .celery_config import CeleryConfig, backend, broker
+from ..config.celery_config import CeleryConfig, backend, broker
+
 
 celery_app = Celery(
     "worker",

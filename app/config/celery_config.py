@@ -1,3 +1,5 @@
+from ..app_config import get_app_config
+
 class CeleryConfig:
     timezone = "Asia/Seoul"
     result_expires = 60 * 60 * 24
@@ -7,5 +9,6 @@ class CeleryConfig:
     }
 
 
-backend = "redis://:ac1c24ef3149@localhost:6379/0"
-broker = "amqp://admin:d418ae373cad@localhost:5672//"
+app_config = get_app_config()
+broker = app_config.celery_broker
+backend = app_config.celery_backend

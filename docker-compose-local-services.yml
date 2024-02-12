@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3.12.12-management
+    container_name: rabbitmq
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: d418ae373cad
+    volumes:
+      - "rabbitmq_data:/var/lib/rabbitmq"
+    networks:
+      net:
+        aliases:
+          - rabbitmq
+
+  redis:
+    image: redis:6.2.14
+    container_name: redis
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ac1c24ef3149
+    volumes:
+      - "redis_data:/data"
+    networks:
+      net:
+        aliases:
+          - redis
+
+volumes:
+  rabbitmq_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  net:
+    driver: bridge
