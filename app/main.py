@@ -1,19 +1,28 @@
 from celery.result import AsyncResult
-from fastapi import Body, FastAPI
+from fastapi import FastAPI, Body, Depends
 from fastapi.responses import JSONResponse
 
 from .worker.celery_worker import create_task, celery_app
 from .app_config import get_app_config
 
-app = FastAPI()
+from .dependencies import get_query_token, get_token_header
+from .routers import items, users
+
+app = FastAPI(dependencies=[Depends(get_query_token)])
+
+app.include_router(users.router)
+app.include_router(items.router)
+
 
 @app.get("/app_config")
 def app_config():
     return get_app_config()
 
+
 @app.get("/root")
 def root():
     return {"message": "Hello"}
+
 
 @app.post("/tasks", status_code=201)
 def run_task(payload = Body(...)):
